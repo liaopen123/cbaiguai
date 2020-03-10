@@ -132,7 +132,7 @@ class _BooksCategoryPageState extends State<BooksCategoryPage> {
       String currentAlphabat = String.fromCharCode("a".codeUnitAt(0) + index);
       print("当前位置:${currentAlphabat}");
       for (BookItem book in data) {
-        if (book.firstLetter == currentAlphabat) {
+        if (book.firstLetter == currentAlphabat&&book.isTitleVisible()) {
           //找到位置进行滚动
           var position = book.position;
           print("当前position:$position");
