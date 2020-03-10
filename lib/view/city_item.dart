@@ -1,3 +1,4 @@
+import 'package:cbaiguai/util/string_sort_utils.dart';
 import 'package:cbaiguai/view/stick_text_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +20,7 @@ class CityItem extends StatelessWidget {
   List<Widget> getCityItem(String name, bool showTitle) {
     List<Widget> list = new List();
     if (showTitle) {
-      list.add(StickTextBar(name));
+      list.add(StickTextBar(PinYinUtils.getFirstPinyin(name)));
     }
     list.add(Container(
       width: double.infinity,

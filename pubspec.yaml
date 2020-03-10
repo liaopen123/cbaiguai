@@ -26,6 +26,8 @@ dependencies:
   dio: ^3.0.7
   flutter_webview_plugin: ^0.3.10+1
   pull_to_refresh: ^1.5.8
+  lpinyin: ^1.0.9
+  flutter_widgets: ^0.1.11
 
 dev_dependencies:
   flutter_test:

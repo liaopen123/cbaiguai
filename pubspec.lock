@@ -57,6 +57,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.3"
+  csslib:
+    dependency: transitive
+    description:
+      name: csslib
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.16.1"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -88,6 +95,20 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.3.10+1"
+  flutter_widgets:
+    dependency: "direct main"
+    description:
+      name: flutter_widgets
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.1.11"
+  html:
+    dependency: transitive
+    description:
+      name: html
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.14.0+3"
   http_parser:
     dependency: transitive
     description:
@@ -102,6 +123,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.4"
+  lpinyin:
+    dependency: "direct main"
+    description:
+      name: lpinyin
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.0.9"
   matcher:
     dependency: transitive
     description:
@@ -221,4 +249,4 @@ packages:
     version: "3.5.0"
 sdks:
   dart: ">2.4.0 <3.0.0"
-  flutter: ">=0.1.4 <2.0.0"
+  flutter: ">=1.12.13+hotfix.5 <2.0.0"
