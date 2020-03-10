@@ -2,8 +2,9 @@ class BookItem{
   String _firstLetter;
   String _content;
   int _position;
+  bool titleVisible;
 
-  BookItem(this._firstLetter, this._content,this._position);
+  BookItem(this._firstLetter, this._content,this._position,this.titleVisible);
 
   int get position => _position;
 
@@ -12,7 +13,7 @@ class BookItem{
   }
 
   bool isTitleVisible(){
-    return _firstLetter.isNotEmpty;
+    return titleVisible;
   }
 
   String get content => _content;
