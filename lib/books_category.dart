@@ -4,7 +4,6 @@ import 'package:cbaiguai/view/city_item.dart';
 import 'package:cbaiguai/view/stick_text_bar.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 
@@ -18,10 +17,8 @@ class BooksCategoryPage extends StatefulWidget {
 class _BooksCategoryPageState extends State<BooksCategoryPage> {
   final GlobalKey globalKey = GlobalKey(); //给widget 的key  获取对应的widget的高度
   List<BookItem> data = new List();
-  double Xvalue = 0;
   double Yvalue = 0;
   bool showHint = false;
-  bool reversed = false;
   double eachItemHeight;
   ItemPositionsListener itemPositionsListener;
 
@@ -59,65 +56,7 @@ class _BooksCategoryPageState extends State<BooksCategoryPage> {
         ),
         body: Container(
           child: Stack(
-            children: [
-              ScrollablePositionedList.builder(
-                  itemCount: data.length,
-                  itemScrollController: _scrollController,
-                  itemPositionsListener: itemPositionsListener,
-                  itemBuilder: (context, index) {
-                    return CityItem(
-                        name: data[index].content,
-                        showTitle: data[index].isTitleVisible());
-                  }),
-              positionsView,
-                Container(
-                  alignment: Alignment.centerRight,
-                  child: Container(
-                //突然想到解决办法了    通过数据定位 就可以知道index的位置了 然后滚动了
-                padding: EdgeInsets.symmetric(vertical: 10),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.elliptical(20, 20)),
-                    color: Colors.yellow),
-
-                child: GestureDetector(
-                  //手指按下时会触发此回调
-                  onPanDown: (DragDownDetails e) {
-                    _getWH(); //获取控件的高度
-                    //打印手指按下的位置(相对于屏幕)
-//                      print("用户手指按下相对于屏幕：${e.globalPosition}");
-                    print("用户手指按下相对于控件：${e.localPosition}");
-                    Xvalue = e.localPosition.dx;
-                    Yvalue = e.localPosition.dy;
-                    turn2Position(Yvalue);
-                  },
-                  //手指滑动时会触发此回调
-                  onPanUpdate: (DragUpdateDetails e) {
-                    //用户手指滑动时，更新偏移，重新构建
-                    setState(() {
-                      Xvalue += e.delta.dx;
-                      Yvalue += e.delta.dy;
-//                        print("用户手指移动相对于控件：$Xvalue。。。。$Yvalue");
-
-                      turn2Position(Yvalue);
-                    });
-                  },
-                  onPanEnd: (DragEndDetails e) {
-                    //打印滑动结束时在x、y轴上的速度
-                    print(e.velocity);
-                    Future.delayed(Duration(seconds: 2), () {
-                      setState(() {
-                        showHint = false;
-                      });
-                    });
-                  },
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    key: globalKey,
-                    children: getAZ(),
-                  ),
-                ),
-              )),
-            ],
+            children: getWidgets(),
           ),
         ),
       );
@@ -148,78 +87,12 @@ class _BooksCategoryPageState extends State<BooksCategoryPage> {
 
   List<Widget> getWidgets() {
     List<Widget> list = [];
-    list.add(ScrollablePositionedList.builder(
-        itemScrollController: _scrollController,
-        itemPositionsListener: itemPositionsListener,
-        itemCount: data.length,
-        itemBuilder: (_, index) {
-          return CityItem(
-              name: data[index].content,
-              showTitle: data[index].isTitleVisible());
-        }));
+    list.add(positionList);
+    list.add(positionsView);
     if (showHint) {
-      list.add(Align(
-        alignment: Alignment.center,
-        child: Container(
-          height: 100,
-          width: 100,
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(6)),
-              color: Colors.yellow),
-          alignment: Alignment.center,
-          child: Text(
-            currentAlphabat,
-            style: TextStyle(fontSize: 20),
-          ),
-        ),
-      ));
+      list.add(hintWidget);
     }
-    list.add(Positioned(
-        child: Container(
-      //突然想到解决办法了    通过数据定位 就可以知道index的位置了 然后滚动了
-      padding: EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.elliptical(20, 20)),
-          color: Colors.yellow),
-
-      child: GestureDetector(
-        //手指按下时会触发此回调
-        onPanDown: (DragDownDetails e) {
-          _getWH(); //获取控件的高度
-          //打印手指按下的位置(相对于屏幕)
-//                      print("用户手指按下相对于屏幕：${e.globalPosition}");
-          print("用户手指按下相对于控件：${e.localPosition}");
-          Xvalue = e.localPosition.dx;
-          Yvalue = e.localPosition.dy;
-          turn2Position(Yvalue);
-        },
-        //手指滑动时会触发此回调
-        onPanUpdate: (DragUpdateDetails e) {
-          //用户手指滑动时，更新偏移，重新构建
-          setState(() {
-            Xvalue += e.delta.dx;
-            Yvalue += e.delta.dy;
-//                        print("用户手指移动相对于控件：$Xvalue。。。。$Yvalue");
-
-            turn2Position(Yvalue);
-          });
-        },
-        onPanEnd: (DragEndDetails e) {
-          //打印滑动结束时在x、y轴上的速度
-          print(e.velocity);
-          Future.delayed(Duration(seconds: 2), () {
-            setState(() {
-              showHint = false;
-            });
-          });
-        },
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          key: globalKey,
-          children: getAZ(),
-        ),
-      ),
-    )));
+    list.add(rightIndexWidget);
 
     return list;
   }
@@ -233,7 +106,6 @@ class _BooksCategoryPageState extends State<BooksCategoryPage> {
   }
 
   void getData() async {
-    print("2333333");
     var dio = Dio();
     var response = await dio.get("http://192.168.0.102:8081/getGhostBooks");
     print("${response.data}");
@@ -256,6 +128,17 @@ class _BooksCategoryPageState extends State<BooksCategoryPage> {
       this.data;
     });
   }
+
+
+  Widget get positionList => ScrollablePositionedList.builder(
+      itemCount: data.length,
+      itemScrollController: _scrollController,
+      itemPositionsListener: itemPositionsListener,
+      itemBuilder: (context, index) {
+        return CityItem(
+            name: data[index].content,
+            showTitle: data[index].isTitleVisible());
+      });
 
   Widget get positionsView => ValueListenableBuilder<Iterable<ItemPosition>>(
     valueListenable: itemPositionsListener.itemPositions,
@@ -294,6 +177,67 @@ class _BooksCategoryPageState extends State<BooksCategoryPage> {
     },
   );
 
+  Widget get hintWidget =>Align(
+    alignment: Alignment.center,
+    child: Container(
+      height: 100,
+      width: 100,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(6)),
+          color: Colors.yellow),
+      alignment: Alignment.center,
+      child: Text(
+        currentAlphabat,
+        style: TextStyle(fontSize: 20),
+      ),
+    ),
+  );
+
+  Widget get rightIndexWidget=> Container(
+      alignment: Alignment.centerRight,
+      child: Container(
+        //突然想到解决办法了    通过数据定位 就可以知道index的位置了 然后滚动了
+        padding: EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.elliptical(20, 20)),
+            color: Colors.yellow),
+
+        child: GestureDetector(
+          //手指按下时会触发此回调
+          onPanDown: (DragDownDetails e) {
+            _getWH(); //获取控件的高度
+            //打印手指按下的位置(相对于屏幕)
+//                      print("用户手指按下相对于屏幕：${e.globalPosition}");
+            print("用户手指按下相对于控件：${e.localPosition}");
+            Yvalue = e.localPosition.dy;
+            turn2Position(Yvalue);
+          },
+          //手指滑动时会触发此回调
+          onPanUpdate: (DragUpdateDetails e) {
+            //用户手指滑动时，更新偏移，重新构建
+            setState(() {
+              Yvalue += e.delta.dy;
+//                        print("用户手指移动相对于控件：$Xvalue。。。。$Yvalue");
+
+              turn2Position(Yvalue);
+            });
+          },
+          onPanEnd: (DragEndDetails e) {
+            //打印滑动结束时在x、y轴上的速度
+            print(e.velocity);
+            Future.delayed(Duration(seconds: 2), () {
+              setState(() {
+                showHint = false;
+              });
+            });
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            key: globalKey,
+            children: getAZ(),
+          ),
+        ),
+      ));
   List<Widget> getAZ() {
     List<Widget> azlist = new List();
     int char = "a".codeUnitAt(0);
