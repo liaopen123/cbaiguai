@@ -7,14 +7,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 
-import 'model/books_category.dart';
+import '../../common_webview_page.dart';
+import '../../model/books_category.dart';
 
 class BooksCategoryPage extends StatefulWidget {
   @override
   _BooksCategoryPageState createState() => _BooksCategoryPageState();
 }
 
-class _BooksCategoryPageState extends State<BooksCategoryPage> {
+class _BooksCategoryPageState extends State<BooksCategoryPage> with AutomaticKeepAliveClientMixin{
   final GlobalKey globalKey = GlobalKey(); //给widget 的key  获取对应的widget的高度
   List<BookItem> data = new List();
   double Yvalue = 0;
@@ -38,7 +39,6 @@ class _BooksCategoryPageState extends State<BooksCategoryPage> {
 
   @override
   Widget build(BuildContext context) {
-
     if (data == null || data.length == 0) {
       return Scaffold(
           appBar: AppBar(
@@ -71,7 +71,7 @@ class _BooksCategoryPageState extends State<BooksCategoryPage> {
       String currentAlphabat = String.fromCharCode("a".codeUnitAt(0) + index);
       print("当前位置:${currentAlphabat}");
       for (BookItem book in data) {
-        if (book.firstLetter == currentAlphabat&&book.isTitleVisible()) {
+        if (book.firstLetter == currentAlphabat && book.isTitleVisible()) {
           //找到位置进行滚动
           var position = book.position;
           print("当前position:$position");
@@ -117,83 +117,98 @@ class _BooksCategoryPageState extends State<BooksCategoryPage> {
           PinYinUtils.getFirstPinyin(data[index].bookName) !=
               (PinYinUtils.getFirstPinyin(data[index - 1].bookName))) {
         String firstPinyin = PinYinUtils.getFirstPinyin(data[index].bookName);
-        this.data.add(BookItem(firstPinyin, data[index].bookName, index,true),);
+        this.data.add(
+              BookItem(firstPinyin, data[index].bookName, index, true,
+                  data[index].bookLink),
+            );
       } else {
         String firstPinyin = PinYinUtils.getFirstPinyin(data[index].bookName);
-        this.data.add(BookItem(firstPinyin, data[index].bookName, index,false));
+        this.data.add(BookItem(firstPinyin, data[index].bookName, index, false,
+            data[index].bookLink));
       }
     }
 
     setState(() {
-      this.data;
+      Future.delayed(Duration(seconds: 3),(){
+        this.data;
+      });
+
     });
   }
-
 
   Widget get positionList => ScrollablePositionedList.builder(
       itemCount: data.length,
       itemScrollController: _scrollController,
       itemPositionsListener: itemPositionsListener,
       itemBuilder: (context, index) {
-        return CityItem(
-            name: data[index].content,
-            showTitle: data[index].isTitleVisible());
+        return InkWell(
+          onTap: () {
+            print("book:${data[index].bookLink}");
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => new CommonWebViewPage(
+                    data[index].bookLink, data[index].content)));
+          },
+          child: CityItem(
+              name: data[index].content,
+              showTitle: data[index].isTitleVisible()),
+        );
       });
 
   Widget get positionsView => ValueListenableBuilder<Iterable<ItemPosition>>(
-    valueListenable: itemPositionsListener.itemPositions,
-    builder: (context, positions, child) {
-      int min;
-      int max;
-      if (positions.isNotEmpty) {
-        // Determine the first visible item by finding the item with the
-        // smallest trailing edge that is greater than 0.  i.e. the first
-        // item whose trailing edge in visible in the viewport.
-        min = positions
-            .where((ItemPosition position) => position.itemTrailingEdge > 0)
-            .reduce((ItemPosition min, ItemPosition position) =>
-        position.itemTrailingEdge < min.itemTrailingEdge
-            ? position
-            : min)
-            .index;
-        // Determine the last visible item by finding the item with the
-        // greatest leading edge that is less than 1.  i.e. the last
-        // item whose leading edge in visible in the viewport.
-        max = positions
-            .where((ItemPosition position) => position.itemLeadingEdge < 1)
-            .reduce((ItemPosition max, ItemPosition position) =>
-        position.itemLeadingEdge > max.itemLeadingEdge
-            ? position
-            : max)
-            .index;
-      }
-      //还得比较一下如果是上滑动 则得提前显示上一个字母
-      if(data[min].firstLetter.isNotEmpty&&data[min].firstLetter!=currentAlphabat){
-        currentAlphabat = data[min].firstLetter;
+        valueListenable: itemPositionsListener.itemPositions,
+        builder: (context, positions, child) {
+          int min;
+          int max;
+          if (positions.isNotEmpty) {
+            // Determine the first visible item by finding the item with the
+            // smallest trailing edge that is greater than 0.  i.e. the first
+            // item whose trailing edge in visible in the viewport.
+            min = positions
+                .where((ItemPosition position) => position.itemTrailingEdge > 0)
+                .reduce((ItemPosition min, ItemPosition position) =>
+                    position.itemTrailingEdge < min.itemTrailingEdge
+                        ? position
+                        : min)
+                .index;
+            // Determine the last visible item by finding the item with the
+            // greatest leading edge that is less than 1.  i.e. the last
+            // item whose leading edge in visible in the viewport.
+            max = positions
+                .where((ItemPosition position) => position.itemLeadingEdge < 1)
+                .reduce((ItemPosition max, ItemPosition position) =>
+                    position.itemLeadingEdge > max.itemLeadingEdge
+                        ? position
+                        : max)
+                .index;
+          }
+          //还得比较一下如果是上滑动 则得提前显示上一个字母
+          print("minminmin:$min");
+          if (min!=null&&data!=null&&data.length>0&&data[min].firstLetter.isNotEmpty &&
+              data[min].firstLetter != currentAlphabat) {
+            currentAlphabat = data[min].firstLetter;
+          }
+          return StickTextBar(currentAlphabat);
+        },
+      );
 
+  Widget get hintWidget => Align(
+        alignment: Alignment.center,
+        child: Container(
+          height: 100,
+          width: 100,
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(6)),
+              color: Colors.yellow),
+          alignment: Alignment.center,
+          child: Text(
+            currentAlphabat,
+            style: TextStyle(fontSize: 20),
+          ),
+        ),
+      );
 
-      }
-      return StickTextBar(currentAlphabat);
-    },
-  );
-
-  Widget get hintWidget =>Align(
-    alignment: Alignment.center,
-    child: Container(
-      height: 100,
-      width: 100,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(6)),
-          color: Colors.yellow),
-      alignment: Alignment.center,
-      child: Text(
-        currentAlphabat,
-        style: TextStyle(fontSize: 20),
-      ),
-    ),
-  );
-
-  Widget get rightIndexWidget=> Container(
+  Widget get rightIndexWidget => Container(
+      margin: EdgeInsets.only(right: 10),
       alignment: Alignment.centerRight,
       child: Container(
         //突然想到解决办法了    通过数据定位 就可以知道index的位置了 然后滚动了
@@ -238,6 +253,7 @@ class _BooksCategoryPageState extends State<BooksCategoryPage> {
           ),
         ),
       ));
+
   List<Widget> getAZ() {
     List<Widget> azlist = new List();
     int char = "a".codeUnitAt(0);
@@ -252,4 +268,7 @@ class _BooksCategoryPageState extends State<BooksCategoryPage> {
     }
     return azlist;
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

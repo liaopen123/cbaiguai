@@ -24,7 +24,7 @@ class CityItem extends StatelessWidget {
     }
     list.add(Container(
       width: double.infinity,
-      color: Colors.grey,
+      color: Colors.white,
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Text(name,style: TextStyle(fontSize: 20),)));
     return list;
